@@ -1,0 +1,8 @@
+pandas
+numpy
+airflow
+transformers
+streamlit
+requests
+bs4
+tqdm
