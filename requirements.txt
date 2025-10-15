@@ -1,8 +1,9 @@
 pandas
 numpy
-airflow
+apache-airflow
 transformers
 streamlit
 requests
 bs4
 tqdm
+requests
