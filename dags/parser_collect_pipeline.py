@@ -1,36 +1,43 @@
-from sqlalchemy import create_engine
-import logging
-from datetime import datetime
-
-
+from sqlalchemy import create_engine, text
 from airflow import DAG
-from airflow.decorators import task
 from airflow.operators.python import PythonOperator
+from datetime import datetime
+import tqdm
+import logging
 
+def init_db():
+    """Инициализация подключения к базе данных"""
+    try:
+        engine = create_engine('postgresql+psycopg2://airflow:airflow@postgres:5432/airflow')
+        logging.info("Подсоединение к базе данных прошло удачно")
+        
+        with engine.connect() as conn:
+            # Выполняем запрос и получаем результат
+            result = conn.execute(text("SELECT 'HELLO, AIRFLOW!' as greeting"))
+            
+            # Извлекаем и логируем результат
+            row = result.fetchone()
+            if row:
+                greeting = row[0]
+                logging.info(f"Результат запроса: {greeting}")
+            else:
+                logging.info("Запрос не вернул результатов")
+            
+        return "database_connection_success"
+        
+    except Exception as e:
+        logging.error(f"Ошибка подключения к базе данных: {e}")
+        raise
 
 with DAG(
-    dag_id='parcer_collect_data',
-    description='ДАГ, который активирует парсер и собирает данные с сайта Ireccomend',
-    start_date = datetime(2025, 10, 10)
+    'parcer_collect_data',
+    description='Парсер данных',
+    start_date = datetime(2025, 10, 17),
+    schedule_interval=None,
+    catchup=False,
 ) as dag:
 
-
-    def get_engine():
-        engine = create_engine('postgresql+psycopg2://airflow:airflow@localhost:5432/')
-        logging.info('Подсоединение к базе данных прошло удачно')
-
-        return engine
-
-    def print_hello():
-        try:
-            conn = get_engine().connect().execute('select "1"')
-            print(conn)
-        except Exception as e:
-            print('ABC, всем приает')
-
-
-    start_task = PythonOperator(task_id = 'inint_db', python_callable = get_engine)
-    hello_task = PythonOperator(task_id = '123', python_callable = print_hello)
-
-
-    start_task >> hello_task
+    init_db_task = PythonOperator(
+        task_id='inint_db',
+        python_callable=init_db,
+    )
