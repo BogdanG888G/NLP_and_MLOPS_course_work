@@ -1,10 +1,7 @@
-pandas
-numpy
-apache-airflow
-transformers
-streamlit
-requests
-bs4
-tqdm
-requests
-psycopg2-binary
+pandas==2.0.3
+numpy==1.24.4
+beautifulsoup4==4.12.2
+requests==2.31.0
+sqlalchemy==2.0.23
+cloudscraper==1.2.71
+fake-useragent==1.4.0

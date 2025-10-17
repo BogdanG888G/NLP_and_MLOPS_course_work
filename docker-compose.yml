@@ -21,7 +21,9 @@ services:
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
       - ./requirements.txt:/opt/airflow/requirements.txt
-    user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
+      - ./parsers:/opt/airflow/parsers
+      - ./data:/opt/airflow/data
+    user: "${AIRFLOW_UID:-50000}:0"
     depends_on:
       redis:
         condition: service_healthy
@@ -58,8 +60,7 @@ services:
 
   airflow-webserver:
     <<: *airflow-common
-    command: >
-      bash -c "pip install -r /opt/airflow/requirements.txt && airflow webserver"
+    command: airflow webserver 
     ports:
       - 8080:8080
     healthcheck:
@@ -71,31 +72,28 @@ services:
 
   airflow-scheduler:
     <<: *airflow-common
-    command: >
-      bash -c "pip install -r /opt/airflow/requirements.txt && airflow scheduler"
+    command: airflow scheduler
     restart: always
 
   airflow-worker:
     <<: *airflow-common
-    command: >
-      bash -c "pip install -r /opt/airflow/requirements.txt && celery worker"
+    command: airflow celery worker
     restart: always
 
   airflow-init:
     <<: *airflow-common
     command: >
-      bash -c "pip install -r /opt/airflow/requirements.txt && airflow version"
+      bash -c "airflow db init && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com"
     environment:
       <<: *airflow-common-env
       _AIRFLOW_DB_UPGRADE: 'true'
       _AIRFLOW_WWW_USER_CREATE: 'true'
-      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
-      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
 
   flower:
     <<: *airflow-common
-    command: >
-      bash -c "pip install -r /opt/airflow/requirements.txt && celery flower"
+    command: airflow celery flower
     ports:
       - 5555:5555
     healthcheck:
