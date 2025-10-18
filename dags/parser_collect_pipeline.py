@@ -125,32 +125,42 @@ def save_data_to_database(**kwargs):
         logging.info(f'📊 Количество отзывов для сохранения: {reviews_count}')
 
         # Подключаемся к базе данных
-        engine = psycopg2.connect(
-            database='airflow', 
-            user='airflow', 
-            password='airflow', 
-            host='postgres', 
-            port=5432
-        )
+        engine = create_engine('postgresql+psycopg2://airflow:airflow@postgres:5432/airflow')
         
         # Читаем данные из CSV
         data = pd.read_csv(csv_path)
         logging.info(f"📊 Данные из CSV ({len(data)} строк):")
         logging.info(f"Колонки: {list(data.columns)}")
-        logging.info(f"Первые 3 строки:\n{data.head(3)}")
-
-        # Проверяем подключение к базе
-        sql_query = "SELECT * FROM parser.reviews LIMIT 10"
-        df = pd.read_sql(sql=sql_query, con=engine)
-        logging.info(f"📋 Данные из БД:\n{df}")
-
-        # TODO: Добавить логику сохранения данных в вашу таблицу
-        # Например:
-        # data.to_sql('reviews', engine, schema='parser', if_exists='append', index=False)
         
-        logging.info(f"✅ Данные успешно подготовлены для сохранения в БД")
+        # Подготовка данных
+        data['batch_id'] = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        data['scraped_at'] = pd.to_datetime(data['scraped_at'])
+        
+        # Преобразуем рейтинг в числовой формат
+        if 'rating' in data.columns:
+            data['rating'] = pd.to_numeric(data['rating'], errors='coerce').fillna(0).astype(int)
+        
+        if 'detailed_rating' in data.columns:
+            data['detailed_rating'] = pd.to_numeric(data['detailed_rating'], errors='coerce')
+        
+        # Сохраняем в базу
+        data.to_sql(
+            'reviews', 
+            engine, 
+            schema='parser', 
+            if_exists='append', 
+            index=False,
+            method='multi'
+        )
+        
+        logging.info(f"✅ Успешно сохранено {len(data)} записей в таблицу parser.raw_reviews")
+        logging.info(f"📋 Пример сохраненной записи:")
+        logging.info(f"   Продукт: {data.iloc[0]['product_name']}")
+        logging.info(f"   Автор: {data.iloc[0]['author']}")
+        logging.info(f"   Рейтинг: {data.iloc[0]['rating']}")
+        logging.info(f"   Текст: {data.iloc[0]['full_text'][:100]}...")
 
-        return f'Занесение данных прошло удачно. Обработано {len(data)} записей'
+        return f'Успешно сохранено {len(data)} записей в БД. Batch: {data.iloc[0]["batch_id"]}'
         
     except Exception as e:
         logging.error(f"❌ Ошибка при сохранении в БД: {e}")
