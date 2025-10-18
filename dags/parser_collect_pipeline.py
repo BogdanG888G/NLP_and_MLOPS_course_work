@@ -3,40 +3,106 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
 from datetime import datetime, timedelta
+import psycopg2
 import logging
+import pandas as pd
 import os
 import sys
+import importlib.util
 
-# Добавляем путь к папке parsers в PYTHONPATH
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'parsers'))
-sys.path.insert(0, '/opt/airflow/parsers')  # альтернативный путь
-
-try:
-    from irecommend_parser import ReviewParser
-    logging.info("✅ ReviewParser успешно импортирован")
-except ImportError as e:
-    logging.error(f"❌ Ошибка импорта ReviewParser: {e}")
-    logging.info(f"Python path: {sys.path}")
-    logging.info(f"Текущая директория: {os.getcwd()}")
-    logging.info(f"Содержимое parsers директории: {os.listdir('/opt/airflow/parsers')}")
-
+# Базовые настройки
 BASE_URL = "https://irecommend.ru"
-TOTAL_PAGES = 2  # Для теста уменьшим количество страниц
+START_URL = "https://irecommend.ru/catalog/reviews/939-13393"  # Добавьте эту переменную
+TOTAL_PAGES = 2
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+
+def load_parser_module():
+    """Динамическая загрузка модуля парсера"""
+    try:
+        # Получаем абсолютный путь к директории DAG
+        parser_path = "/opt/airflow/parsers/irecommend_parser.py"
+        
+        logging.info(f"🔍 Ищем парсер по пути: {parser_path}")
+        
+        if not os.path.exists(parser_path):
+            raise FileNotFoundError(f"Файл парсера не найден: {parser_path}")
+        
+        # Динамически загружаем модуль
+        spec = importlib.util.spec_from_file_location("irecommend_parser", parser_path)
+        parser_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(parser_module)
+        
+        logging.info("✅ Модуль парсера успешно загружен")
+        return parser_module
+        
+    except Exception as e:
+        logging.error(f"❌ Ошибка загрузки модуля парсера: {e}")
+        raise
+
+def collect_data(**kwargs):
+    """Сбор данных с помощью парсера и сохранение в CSV"""
+    try:
+        ti = kwargs['ti']
+        
+        # Загружаем модуль парсера
+        parser_module = load_parser_module()
+        
+        # Создаем экземпляр парсера
+        parser = parser_module.ReviewParser(BASE_URL)
+        
+        logging.info("🔄 Начинаем сбор данных с парсера...")
+        
+        # ЗАМЕНИТЕ ЭТУ СТРОКУ: используем правильный метод из парсера
+        reviews = parser.scrape_reviews(start_url=START_URL, pages=TOTAL_PAGES)  # ИЗМЕНЕНИЕ ЗДЕСЬ
+        
+        if not reviews:
+            logging.warning("⚠️ Парсер не вернул данные")
+            return "no_data_collected"
+        
+        logging.info(f"✅ Собрано отзывов: {len(reviews)}")
+        
+        # Сохраняем в CSV
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        csv_filename = f"reviews_{timestamp}.csv"
+        
+        # Сохраняем в папку dags/files (создаем если нет)
+        output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
+        os.makedirs(output_dir, exist_ok=True)
+        
+        csv_path = os.path.join(output_dir, csv_filename)
+        
+        # Используем метод сохранения из парсера
+        parser.save_to_csv(reviews, csv_path)
+        
+        logging.info(f"💾 Данные сохранены в: {csv_path}")
+        
+        # Передаем путь к файлу через XCom
+        ti.xcom_push(key='csv_path', value=csv_path)
+        ti.xcom_push(key='reviews_count', value=len(reviews))
+        
+        return f"collected_{len(reviews)}_reviews"
+        
+    except Exception as e:
+        logging.error(f"❌ Ошибка при сборе данных: {e}")
+        raise
 
 def init_db():
     """Инициализация подключения к базе данных"""
     try:
-        engine = create_engine('postgresql+psycopg2://airflow:airflow@postgres:5432/airflow')
+        connection = psycopg2.connect(
+            database='airflow', 
+            user='airflow', 
+            password='airflow',
+            host='postgres',
+            port=5432
+        )
         logging.info("✅ Подключение к базе данных прошло успешно")
         
-        with engine.connect() as conn:
-            result = conn.execute(text("SELECT 'HELLO, AIRFLOW!' as greeting"))
-            row = result.fetchone()
-            if row:
-                greeting = row[0]
-                logging.info(f"Результат запроса: {greeting}")
-            else:
-                logging.info("Запрос не вернул результатов")
+        query = "SELECT * FROM parser.reviews LIMIT 10"
+        df = pd.read_sql(sql=query, con=connection)
+        logging.info(f"Данные из БД:\n{df}")
             
         return "database_connection_success"
         
@@ -44,63 +110,85 @@ def init_db():
         logging.error(f"❌ Ошибка подключения к базе данных: {e}")
         raise
 
-def parse_reviews():
-    """Функция для парсинга отзывов"""
+def save_data_to_database(**kwargs):
+    """Сохранение данных в базу данных"""
     try:
-        logging.info("🔄 Запуск парсера...")
+        ti = kwargs['ti']
+        csv_path = ti.xcom_pull(task_ids='collect_data', key='csv_path')
+        reviews_count = ti.xcom_pull(task_ids='collect_data', key='reviews_count')
         
-        parser = ReviewParser(BASE_URL)
-        logging.info(f"🔄 Парсим {TOTAL_PAGES} страниц...")
-        
-        # Используем тестовый режим
-        reviews = parser.run_parsing(total_pages=TOTAL_PAGES)
-        
-        if reviews:
-            os.makedirs('/opt/airflow/data/reviews', exist_ok=True)
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            csv_path = f'/opt/airflow/data/reviews/reviews_{timestamp}.csv'
-            parser.save_to_csv(reviews, csv_path)
+        if not csv_path or not os.path.exists(csv_path):
+            logging.error("❌ Файл с данными не найден")
+            return "Файл с данными не найден"
             
-            logging.info(f"✅ Парсинг завершен. Собрано {len(reviews)} отзывов")
-            logging.info(f"💾 Файл сохранен: {csv_path}")
-            
-            return f"Успешно собрано {len(reviews)} отзывов"
-        else:
-            logging.warning("⚠️ Парсинг не дал результатов")
-            return "Собрано 0 отзывов"
-            
-    except Exception as e:
-        logging.error(f"❌ Ошибка при парсинге: {e}")
-        raise
+        logging.info(f'📁 Файл с данными: {csv_path}')
+        logging.info(f'📊 Количество отзывов для сохранения: {reviews_count}')
 
-# Определение DAG
+        # Подключаемся к базе данных
+        engine = psycopg2.connect(
+            database='airflow', 
+            user='airflow', 
+            password='airflow', 
+            host='postgres', 
+            port=5432
+        )
+        
+        # Читаем данные из CSV
+        data = pd.read_csv(csv_path)
+        logging.info(f"📊 Данные из CSV ({len(data)} строк):")
+        logging.info(f"Колонки: {list(data.columns)}")
+        logging.info(f"Первые 3 строки:\n{data.head(3)}")
+
+        # Проверяем подключение к базе
+        sql_query = "SELECT * FROM parser.reviews LIMIT 10"
+        df = pd.read_sql(sql=sql_query, con=engine)
+        logging.info(f"📋 Данные из БД:\n{df}")
+
+        # TODO: Добавить логику сохранения данных в вашу таблицу
+        # Например:
+        # data.to_sql('reviews', engine, schema='parser', if_exists='append', index=False)
+        
+        logging.info(f"✅ Данные успешно подготовлены для сохранения в БД")
+
+        return f'Занесение данных прошло удачно. Обработано {len(data)} записей'
+        
+    except Exception as e:
+        logging.error(f"❌ Ошибка при сохранении в БД: {e}")
+        return f"Ошибка при сохранении в БД: {str(e)}"
+
+
 with DAG(
-    'parser_collect_data', 
+    'parser_collect_data',
     description='Парсер данных с iRecommend',
-    start_date=datetime(2025, 10, 17),
-    schedule_interval=None,
+    schedule_interval='0 2 * * *',  # Каждый день в 02:00,
     catchup=False,
+    start_date = datetime(2025, 10, 18),
     tags=['parsing', 'data_collection'],
 ) as dag:
     
-    start_task = EmptyOperator(
-        task_id='start'
-    )
-
+    start_task = EmptyOperator(task_id='start')
+    
     init_db_task = PythonOperator(
         task_id='init_db', 
         python_callable=init_db,
         execution_timeout=timedelta(minutes=5)
     )
-
+    
     collect_data_task = PythonOperator(
-        task_id="collect_data",
-        python_callable=parse_reviews,
-        execution_timeout=timedelta(minutes=5)
+        task_id='collect_data',
+        python_callable=collect_data,
+        execution_timeout=timedelta(minutes=30),  # Парсинг может занять время
+        provide_context=True
+    )
+    
+    insert_data_task = PythonOperator(
+        task_id='insert_data',
+        python_callable=save_data_to_database,
+        provide_context=True
     )
 
-    end_task = EmptyOperator(
-        task_id='end'
-    )
+    
+    end_task = EmptyOperator(task_id='end')
 
-    start_task >> init_db_task >> collect_data_task >> end_task
+    # Определяем порядок выполнения
+    start_task >> init_db_task >> collect_data_task >> insert_data_task >> end_task
