@@ -80,7 +80,6 @@ def collect_data(**kwargs):
         
         # Передаем путь к файлу через XCom
         ti.xcom_push(key='csv_path', value=csv_path)
-        ti.xcom_push(key='reviews_count', value=len(reviews))
         
         return f"collected_{len(reviews)}_reviews"
         
@@ -115,14 +114,12 @@ def save_data_to_database(**kwargs):
     try:
         ti = kwargs['ti']
         csv_path = ti.xcom_pull(task_ids='collect_data', key='csv_path')
-        reviews_count = ti.xcom_pull(task_ids='collect_data', key='reviews_count')
         
         if not csv_path or not os.path.exists(csv_path):
             logging.error("❌ Файл с данными не найден")
             return "Файл с данными не найден"
             
         logging.info(f'📁 Файл с данными: {csv_path}')
-        logging.info(f'📊 Количество отзывов для сохранения: {reviews_count}')
 
         # Подключаемся к базе данных
         engine = create_engine('postgresql+psycopg2://airflow:airflow@postgres:5432/airflow')
@@ -133,16 +130,18 @@ def save_data_to_database(**kwargs):
         logging.info(f"Колонки: {list(data.columns)}")
         
         # Подготовка данных
-        data['batch_id'] = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         data['scraped_at'] = pd.to_datetime(data['scraped_at'])
-        
-        # Преобразуем рейтинг в числовой формат
-        if 'rating' in data.columns:
-            data['rating'] = pd.to_numeric(data['rating'], errors='coerce').fillna(0).astype(int)
-        
-        if 'detailed_rating' in data.columns:
-            data['detailed_rating'] = pd.to_numeric(data['detailed_rating'], errors='coerce')
-        
+
+        data['combined_data'] = pd.to_datetime(data['date_created'] + ' ' + data['time_created'])
+
+        max_date_from_table = pd.read_sql(sql = "select max(combined_created) from parser.reviews", con = engine)
+
+        max_date = max_date_from_table['max'].iloc[0]
+
+        data = data[
+            (data['combined_data'] > max_date)
+        ]
+
         # Сохраняем в базу
         data.to_sql(
             'reviews', 
@@ -154,13 +153,8 @@ def save_data_to_database(**kwargs):
         )
         
         logging.info(f"✅ Успешно сохранено {len(data)} записей в таблицу parser.raw_reviews")
-        logging.info(f"📋 Пример сохраненной записи:")
-        logging.info(f"   Продукт: {data.iloc[0]['product_name']}")
-        logging.info(f"   Автор: {data.iloc[0]['author']}")
-        logging.info(f"   Рейтинг: {data.iloc[0]['rating']}")
-        logging.info(f"   Текст: {data.iloc[0]['full_text'][:100]}...")
 
-        return f'Успешно сохранено {len(data)} записей в БД. Batch: {data.iloc[0]["batch_id"]}'
+        return f'Успешно сохранено {len(data)} записей в БД'
         
     except Exception as e:
         logging.error(f"❌ Ошибка при сохранении в БД: {e}")
