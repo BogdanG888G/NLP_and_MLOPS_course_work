@@ -4,6 +4,8 @@
 *.
 *.txt
 *.log
+*.jsonl
+*.png
 
 logs/
 
