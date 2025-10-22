@@ -1,7 +1,10 @@
 
 *.csv
 *.json
+*.
+*.txt
 *.log
+
 logs/
 
 reviews_*.json
