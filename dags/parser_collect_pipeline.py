@@ -12,7 +12,7 @@ from sqlalchemy import create_engine
 
 # Настройки
 BASE_URL = "https://irecommend.ru"
-START_URL = "https://irecommend.ru/catalog/reviews/939-13393?page=2"
+START_URL = "https://irecommend.ru/catalog/reviews/939-13393?page=4"
 TOTAL_PAGES = 1  # Количество страниц для парсинга
 
 # Настройка логирования
@@ -130,7 +130,7 @@ def save_data_to_database(**kwargs):
             )
         else:
             data['combined_created'] = pd.NaT
-        
+        '''
         # Получаем максимальную дату из таблицы
         try:
             max_date_query = "SELECT MAX(combined_created) as max_date FROM parser.reviews"
@@ -151,7 +151,7 @@ def save_data_to_database(**kwargs):
         
         if len(data) == 0:
             logging.info("ℹ️ Нет новых данных для добавления")
-            return "no_new_data"
+            return "no_new_data"'''
         
         # Сохраняем в базу
         data.to_sql(

@@ -56,6 +56,10 @@
 
 Разметка текста по лейблам производится в LabelStudio
 
+![alt text](image-3.png)
+
+Запуск сервиса:
+
 ```cmd
 label-studio start
 ```
