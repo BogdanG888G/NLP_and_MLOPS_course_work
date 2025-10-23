@@ -6,6 +6,7 @@
 *.log
 *.jsonl
 *.png
+*.safetensors
 
 logs/
 
