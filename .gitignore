@@ -5,7 +5,6 @@
 *.txt
 *.log
 *.jsonl
-*.png
 *.safetensors
 my_simple_aspect_model/
 
