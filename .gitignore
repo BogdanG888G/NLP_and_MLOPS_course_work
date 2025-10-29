@@ -7,6 +7,10 @@
 *.jsonl
 *.safetensors
 my_simple_aspect_model/
+*.logs
+*.models
+best_model_transformer/
+
 
 logs/
 
