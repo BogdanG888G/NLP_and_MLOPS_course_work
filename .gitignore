@@ -9,8 +9,10 @@
 my_simple_aspect_model/
 *.logs
 *.models
+models/
 best_model_transformer/
-
+0.26.0
+0.26.0'
 
 logs/
 
