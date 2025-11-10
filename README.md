@@ -58,11 +58,18 @@
 
 ![alt text](image-3.png)
 
-Запуск сервиса:
+Запуск инференса-сервиса (FAST API):
+
+```cmd
+docker run -p 8000:8000 sentiment-api
+```
+
+Запуск сервиса разметки:
 
 ```cmd
 label-studio start
 ```
+
 Перейти в labelStudio и создать проект:
 http://localhost:8080/
 

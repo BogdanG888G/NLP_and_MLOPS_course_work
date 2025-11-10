@@ -12,7 +12,7 @@ from sqlalchemy import create_engine
 
 # Настройки
 BASE_URL = "https://irecommend.ru"
-START_URL = "https://irecommend.ru/catalog/reviews/939-13393?page=11"
+START_URL = "https://irecommend.ru/catalog/reviews/939-13393?page=67"
 TOTAL_PAGES = 1  # Количество страниц для парсинга
 
 # Настройка логирования
