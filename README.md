@@ -58,13 +58,18 @@
 
 ![alt text](image-3.png)
 
-Запуск инференса-сервиса (FAST API):
+## Запуск инференса-сервиса (FAST API):
 
 ```cmd
 docker run -p 8000:8000 sentiment-api
 ```
 
-Запуск сервиса разметки:
+http://localhost:8000/
+
+![alt text](image-4.png)
+![alt text](image-5.png)
+
+## Запуск сервиса разметки (Label Studio):
 
 ```cmd
 label-studio start
@@ -77,3 +82,5 @@ http://localhost:8080/
 
 * Login: `admin`
 * Password: `admin123`
+
+

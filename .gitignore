@@ -1,7 +1,6 @@
 
 *.csv
 *.json
-*.
 *.txt
 *.log
 *.jsonl
@@ -14,6 +13,7 @@ best_model_transformer/
 0.26.0'
 models
 logs/
+parser.ipynb
 
 reviews_*.json
 reviews_*.csv
