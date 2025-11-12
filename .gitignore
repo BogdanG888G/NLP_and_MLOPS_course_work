@@ -14,7 +14,7 @@ best_model_transformer/
 models
 logs/
 parser.ipynb
-
+mlruns/
 reviews_*.json
 reviews_*.csv
 parser.log
