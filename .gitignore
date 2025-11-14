@@ -21,7 +21,7 @@ parser.log
 *.pkl
 *.html
 mlartifacts/
-
+*.keras
 
 __pycache__/
 *.py[cod]
