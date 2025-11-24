@@ -6,6 +6,8 @@
 *.jsonl
 *.safetensors
 my_simple_aspect_model/
+*.joblib
+
 *.logs
 *.models
 best_model_transformer/

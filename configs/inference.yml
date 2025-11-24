@@ -1,0 +1,19 @@
+mlflow:
+  tracking_uri: "http://127.0.0.1:8080"
+  experiment_id: "0"
+
+# Настройки для поиска моделей
+model:
+  run_name: "first_model_experiment"
+  artifacts_path: "models"  # ← исправлено на artifacts_path
+  vectorizer: "tfidf_vectorizer.joblib"
+  bayes: "naive_bayes_model.joblib" 
+  encoder: "label_encoder.joblib"
+
+# Настройки для поиска функции препроцессинга
+preprocess:
+  run_name: "First dataset"
+  artifact_path: "functions/preprocess_text_first.pkl"
+
+# Текст для тестирования
+test_text: "Меня привлекло такое сочетание"

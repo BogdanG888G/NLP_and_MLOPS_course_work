@@ -1,0 +1,14 @@
+preprocess:
+  input_files:
+    - "project-8-at-2025-11-01-11-43-483e368c.json"
+    - "project-9-at-2025-11-01-11-51-0428f45f.json"
+    - "project-10-at-2025-11-06-14-16-bb9bc9cd.json"
+    - "project-11-at-2025-11-18-13-47-3e3c1fa5.json"
+  
+  output:
+    dataset_csv: "third_experiment_dataset.csv"
+
+mlflow:
+  dataset_version: "3.0.0"
+  experiment_name: "dataset_preprocessing"
+  tracking_uri: "sqlite:///mlflow.db"

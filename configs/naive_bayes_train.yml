@@ -1,0 +1,27 @@
+mlflow:
+  tracking_uri: "http://127.0.0.1:8080"
+  experiment_id: "0"
+
+data:
+  source_run: "First dataset"
+  dataset_file: "first_experiment_dataset.csv"  # ← имя файла
+  dataset_path: "datasets"  # ← папка с файлом
+
+vectorizer:
+  lowercase: true
+  analyzer: "word"
+  max_features: 5000
+  ngram_range: [1, 4]
+  min_df: 2
+  max_df: 0.9
+
+training:
+  test_size: 0.2
+  random_state: 42
+
+model:
+  version: "1.0.0"
+  artifacts:
+    model: "naive_bayes_model.joblib"
+    vectorizer: "tfidf_vectorizer.joblib"
+    encoder: "label_encoder.joblib"

@@ -1,0 +1,20 @@
+training:
+  test_size: 0.2
+  random_state: 42
+  stratify: true
+
+vectorizer:
+  type: "tfidf"
+  params:
+    lowercase: true
+    analyzer: "word"
+    max_features: 5000
+    ngram_range: [1, 4]
+    min_df: 2
+    max_df: 0.9
+
+model:
+  type: "naive_bayes"
+  params:
+    alpha: 1.0
+    fit_prior: true
