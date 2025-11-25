@@ -1,6 +1,11 @@
 model:
-  model_name: "sberbank-ai/ruBert-base"
+  name: "sberbank-ai/ruBert-base"
   version: "1.0.0"
+  max_length: 512
+  dropout:
+    hidden: 0.1
+    attention: 0.1
+    classifier: 0.1
 
 tokenizer:
   max_length: 512
@@ -8,11 +13,14 @@ tokenizer:
   truncation: true
 
 data:
-  dataset_path: "datasets"             # <-- папка
-  dataset_file: "third_experiment_dataset.csv"   # <-- файл
-  text_column: "text"
-  label_column: "category"
-  source_run: "Third dataset"          # <-- если у тебя датасет загружен внутри этого run
+  dataset_path: "datasets"
+  dataset_file: "third_experiment_dataset.csv"
+  text_column: "span"  # ← ИЗМЕНИЛ с "text" на "span" (как у тебя в датасете)
+  label_column: "label" # ← ИЗМЕНИЛ с "category" на "label" (как у тебя в датасете)
+  source_run: "Third dataset"
+  train_size: 0.8
+  val_size: 0.5
+  random_state: 42
 
 training:
   output_dir: "models_transformer/"
@@ -29,19 +37,15 @@ training:
   save_total_limit: 2
   max_grad_norm: 1.0
   early_stopping_patience: 3
-  test_size: 0.2
-  val_size: 0.5
-  random_state: 42
   metric_for_best_model: "f1-score"
   load_best_model_at_end: true
 
 mlflow:
   tracking_uri: "http://127.0.0.1:8080"
-  experiment_name: "Third dataset"     # <-- имя эксперимента
+  experiment_name: "0"  # ← ИЗМЕНИЛ на ID эксперимента "0" (как у тебя)
   run_name: "transformers_experiment_3"
   dataset_version: "3.0.0"
 
-model:
-  artifacts:
-    model_dir: "artifacts/model"
-    tokenizer_dir: "artifacts/tokenizer"
+artifacts:
+  model_dir: "artifacts/model"
+  tokenizer_dir: "artifacts/tokenizer"

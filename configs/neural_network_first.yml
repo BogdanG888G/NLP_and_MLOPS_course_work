@@ -23,7 +23,7 @@ training:
   val_size: 0.5  # от test_size
   random_state: 42
   batch_size: 16
-  epochs: 10
+  epochs: 20
 
 # Конфигурация модели
 model:

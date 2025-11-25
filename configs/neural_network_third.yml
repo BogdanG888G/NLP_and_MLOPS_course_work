@@ -1,0 +1,38 @@
+mlflow:
+  tracking_uri: "http://127.0.0.1:8080"
+  experiment_id: "0"
+
+# Конфигурация данных
+data:
+  source_run: "Third dataset"
+  dataset_file: "third_experiment_dataset.csv"
+  dataset_path: "datasets"
+
+# Конфигурация токенизатора
+tokenizer:
+  num_words: 2000
+  oov_token: "unknown"
+  filters: '!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n'
+  lower: true
+  split: " "
+  char_level: false
+
+# Конфигурация обучения
+training:
+  test_size: 0.2
+  val_size: 0.5
+  random_state: 42
+  batch_size: 32
+  epochs: 10
+
+# Конфигурация модели Bidirectional GRU
+model:
+  version: "3.0.0"
+  embedding_dim: 512
+  gru_units: 128
+  dense_units: 64
+  artifacts:
+    model: "LSTM_ver_3.keras"
+    tokenizer: "tokenizer.pkl"
+    encoder: "label_encoder.pkl"
+    preprocessing_info: "preprocessing_info.pkl"

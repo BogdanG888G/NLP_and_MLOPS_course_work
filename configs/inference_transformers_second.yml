@@ -1,0 +1,16 @@
+mlflow:
+  experiment_id: "0"
+  tracking_uri: "http://127.0.0.1:8080"
+
+model:
+  run_name: "transformers_experiment_2"
+  artifacts_path: "model"
+  tokenizer_path: "tokenizer"
+
+tokenizer:
+  max_length: 512
+  padding: True
+  truncation: True
+  return_tensors: "pt"
+
+test_text: "Пример текста для классификации на русском языке"

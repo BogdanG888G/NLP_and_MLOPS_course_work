@@ -11,6 +11,8 @@ my_simple_aspect_model/
 *.logs
 *.models
 best_model_transformer/
+models_transformer/
+results/
 0.26.0
 0.26.0'
 models

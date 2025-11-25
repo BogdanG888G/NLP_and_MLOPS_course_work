@@ -12,17 +12,14 @@ data:
 
 # Конфигурация модели трансформера
 model:
-  version: "1.0.0"
+  version: "1.1.0"  # увеличиваем версию
   model_name: "cointegrated/rubert-tiny2"
-  artifacts:
-    model_dir: "Transformers_ver_1"
-    tokenizer_dir: "Tokenizer_transformers_ver_1"
 
 # Конфигурация токенизатора
 tokenizer:
   truncation: true
-  padding: false
-  max_length: 512
+  padding: true  # меняем на true для стабильности
+  max_length: 256  # уменьшаем длину для tiny модели
   return_tensors: null
 
 # Конфигурация обучения
@@ -31,18 +28,23 @@ training:
   val_size: 0.5
   random_state: 42
   output_dir: "./models/"
-  num_train_epochs: 5
-  learning_rate: 3e-5
-  per_device_train_batch_size: 4
-  per_device_eval_batch_size: 4
+  num_train_epochs: 10  # увеличиваем эпохи
+  learning_rate: 2e-5  # УВЕЛИЧИВАЕМ в 10 раз!
+  per_device_train_batch_size: 16  # УВЕЛИЧИВАЕМ
+  per_device_eval_batch_size: 16
   warmup_ratio: 0.1
-  lr_scheduler_type: "cosine"
-  weight_decay: 0.2
+  lr_scheduler_type: "linear"
+  weight_decay: 0.01  # уменьшаем
   max_grad_norm: 1.0
-  logging_steps: 100
+  logging_steps: 50
   eval_strategy: "epoch"
   save_strategy: "epoch"
   save_total_limit: 2
   load_best_model_at_end: true
-  metric_for_best_model: "f1-score"
-  early_stopping_patience: 5
+  metric_for_best_model: "f1-score"  # меняем на f1_score
+  early_stopping_patience: 3  # уменьшаем
+
+# Конфигурация артефактов
+artifacts:
+  model_dir: "Transformers_ver_1_improved"
+  tokenizer_dir: "Tokenizer_transformers_ver_1_improved"

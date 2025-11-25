@@ -1,0 +1,15 @@
+mlflow:
+  tracking_uri: "http://127.0.0.1:8080"
+  experiment_id: "0"
+
+# Настройки для поиска моделей
+model:
+  run_name: "third_experiment_neural_network"
+  artifacts_path: "models"
+  model_file: "LSTM_ver_3.keras"
+  tokenizer: "tokenizer.pkl"
+  encoder: "label_encoder.pkl"
+  preprocessing_info: "preprocessing_info.pkl"
+
+# Текст для тестирования
+test_text: "Можно было сделать чипсы и повкуснее"

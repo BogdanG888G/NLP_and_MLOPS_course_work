@@ -1,0 +1,45 @@
+mlflow:
+  tracking_uri: "http://127.0.0.1:8080"
+  experiment_id: "0"
+
+# Конфигурация данных
+data:
+  source_run: "Second dataset"
+  dataset_file: "second_experiment_dataset.csv"
+  dataset_path: "datasets"
+  text_column: "span"
+  label_column: "label"
+
+# Конфигурация модели трансформера
+model:
+  version: "2.0.0"
+  model_name: "cointegrated/rubert-tiny"
+
+# Конфигурация токенизатора
+tokenizer:
+  max_length: 512
+  padding: true
+  truncation: true
+  return_tensors: null
+
+# Конфигурация обучения
+training:
+  test_size: 0.2
+  val_size: 0.5
+  random_state: 42
+  output_dir: "./results"
+  num_train_epochs: 10
+  learning_rate: 2e-5
+  per_device_train_batch_size: 8
+  per_device_eval_batch_size: 8
+  eval_strategy: "epoch"
+  save_strategy: "epoch"
+  logging_dir: "./logs"
+  logging_steps: 50
+  load_best_model_at_end: true
+  metric_for_best_model: "f1_score"
+
+# Конфигурация артефактов
+artifacts:
+  model_dir: "transformers_model_second_version"
+  tokenizer_dir: "transformers_tokenizer_second_version"
