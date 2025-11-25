@@ -1,0 +1,30 @@
+mlflow:
+  tracking_uri: "http://127.0.0.1:8080"
+  experiment_id: "0"
+
+# Конфигурация данных
+data:
+  source_run: "Third dataset"
+  dataset_file: "third_experiment_dataset.csv"
+
+# Конфигурация векторизатора
+vectorizer:
+  lowercase: true
+  analyzer: "word"
+  max_features: 5000
+  ngram_range: [1, 4]
+  min_df: 2
+  max_df: 0.9
+
+# Конфигурация обучения
+training:
+  test_size: 0.2
+  random_state: 42
+
+# Конфигурация модели
+model:
+  version: "3.0.0"
+  artifacts:
+    model: "naive_bayes.pkl"
+    vectorizer: "tfidfvectoraizer.pkl"
+    encoder: "labelencoder.pkl"

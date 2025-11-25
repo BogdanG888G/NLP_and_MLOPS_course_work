@@ -1,0 +1,16 @@
+mlflow:
+  tracking_uri: "http://127.0.0.1:8080"
+  experiment_id: "0"   # или свой ID
+
+model:
+  run_name: "transformers_experiment_3"   # === ИМЯ RUN'a в MLflow ===
+  artifacts_path: "best_model_transformer"   # путь до модели
+  tokenizer_path: "best_model_tokenaiser"    # путь до токенайзера
+
+tokenizer:
+  truncation: true
+  padding: true
+  max_length: 512
+  return_tensors: "pt"
+
+test_text: "В целом, чипсы Ашан Красная птица Барбекю вполне съедобные"

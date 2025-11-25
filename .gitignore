@@ -7,7 +7,7 @@
 *.safetensors
 my_simple_aspect_model/
 *.joblib
-
+*.h5
 *.logs
 *.models
 best_model_transformer/

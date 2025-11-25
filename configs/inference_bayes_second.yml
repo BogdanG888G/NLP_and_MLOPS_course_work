@@ -1,0 +1,19 @@
+mlflow:
+  tracking_uri: "http://127.0.0.1:8080"
+  experiment_id: "0"
+
+# Настройки для поиска моделей
+model:
+  run_name: "second_model_experiment"
+  artifacts_path: "models"
+  vectorizer: "tfidfvectoraizer.pkl"
+  bayes: "naive_bayes.pkl"
+  encoder: "labelencoder.pkl"
+
+# Настройки для поиска функции препроцессинга
+preprocess:
+  run_name: "Second dataset"
+  artifact_path: "functions/clean_text_only.pkl"  # ← исправлено на правильное имя
+
+# Текст для тестирования
+test_text: "Меня не привлекло такое сочетание 😭"

@@ -1,0 +1,14 @@
+mlflow:
+  tracking_uri: "http://127.0.0.1:8080"
+  experiment_id: "0"
+
+# Настройки для поиска моделей
+model:
+  run_name: "second_experiment_neural_network"
+  artifacts_path: "models"
+  model_file: "CNN_ver_2.keras"
+  tokenizer: "tokenizer.pkl"
+  encoder: "encoder.pkl"
+
+# Текст для тестирования
+test_text: "В целом, чипсы Ашан Красная птица Барбекю вполне съедобные"
