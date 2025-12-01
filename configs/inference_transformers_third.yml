@@ -4,8 +4,8 @@ mlflow:
 
 model:
   run_name: "transformers_experiment_3"
-  artifacts_path: "model"  # путь к модели в MLflow
-  tokenizer_path: "tokenizer"  # путь к токенизатору в MLflow
+  artifacts_path: "model"
+  tokenizer_path: "tokenizer" 
 
 tokenizer:
   max_length: 512

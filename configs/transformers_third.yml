@@ -15,8 +15,8 @@ tokenizer:
 data:
   dataset_path: "datasets"
   dataset_file: "third_experiment_dataset.csv"
-  text_column: "span"  # ← ИЗМЕНИЛ с "text" на "span" (как у тебя в датасете)
-  label_column: "label" # ← ИЗМЕНИЛ с "category" на "label" (как у тебя в датасете)
+  text_column: "span"
+  label_column: "label"
   source_run: "Third dataset"
   train_size: 0.8
   val_size: 0.5
@@ -42,7 +42,7 @@ training:
 
 mlflow:
   tracking_uri: "http://127.0.0.1:8080"
-  experiment_name: "0"  # ← ИЗМЕНИЛ на ID эксперимента "0" (как у тебя)
+  experiment_name: "0"
   run_name: "transformers_experiment_3"
   dataset_version: "3.0.0"
 

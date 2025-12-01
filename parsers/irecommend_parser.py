@@ -7,7 +7,6 @@ import random
 from urllib.parse import urljoin
 from datetime import datetime
 
-# Настройка логирования
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -43,7 +42,6 @@ class ReviewParser:
                 response = self.session.get(url, timeout=15)
                 
                 if response.status_code == 200:
-                    # Проверяем, что получили контент с отзывами
                     if 'smTeaser' in response.text or 'reviewBlock' in response.text:
                         return response.text
                     else:
@@ -65,7 +63,6 @@ class ReviewParser:
         soup = BeautifulSoup(html, 'html.parser')
         reviews_data = []
         
-        # Находим все блоки с отзывами
         review_blocks = soup.find_all('div', class_='smTeaser')
         
         for block in review_blocks:
@@ -79,30 +76,25 @@ class ReviewParser:
     def parse_review_preview(self, block):
         """Парсинг превью отзыва из списка"""
         try:
-            # Основная информация
             product_elem = block.find('div', class_='productName')
             product_name = product_elem.get_text(strip=True) if product_elem else "Неизвестный продукт"
             
             author_elem = block.find('div', class_='authorName')
             author_name = author_elem.get_text(strip=True) if author_elem else "Аноним"
             
-            # Рейтинг
             rating = self.extract_rating(block)
             
-            # Дата и время
             date_elem = block.find('span', class_='date-created')
             time_elem = block.find('span', class_='time-created')
             date_created = date_elem.get_text(strip=True) if date_elem else ""
             time_created = time_elem.get_text(strip=True) if time_elem else ""
             
-            # Заголовок и текст превью
             title_elem = block.find('div', class_='reviewTitle')
             title = title_elem.get_text(strip=True) if title_elem else ""
             
             teaser_elem = block.find('span', class_='reviewTeaserText')
             teaser_text = teaser_elem.get_text(strip=True) if teaser_elem else ""
             
-            # Ссылка на полный отзыв
             link_elem = block.find('a', class_='reviewTextSnippet')
             review_url = urljoin(self.base_url, link_elem['href']) if link_elem and link_elem.get('href') else ""
             
@@ -136,17 +128,14 @@ class ReviewParser:
             return None
             
         try:
-            # Полный текст отзыва
             review_body = review_block.find('div', itemprop='reviewBody')
             full_text = self.clean_text(review_body) if review_body else ""
             
-            # Дополнительная информация
             experience = self.extract_experience(review_block)
             pluses = self.extract_pluses(review_block)
             minuses = self.extract_minuses(review_block)
             verdict = self.extract_verdict(review_block)
             
-            # Рейтинг из мета-тега
             rating_meta = review_block.find('meta', itemprop='ratingValue')
             rating = rating_meta['content'] if rating_meta else ""
             
@@ -168,12 +157,10 @@ class ReviewParser:
         try:
             rating_elem = block.find('div', class_='starsRating')
             if rating_elem:
-                # Ищем класс с рейтингом
                 for cls in rating_elem.get('class', []):
                     if 'fivestarWidgetStatic-' in cls:
                         return cls.split('-')[-1]
                 
-                # Считаем заполненные звезды
                 stars = rating_elem.find_all('div', class_='star')
                 filled = sum(1 for star in stars if star.find('div', class_='on'))
                 return str(filled)
@@ -225,13 +212,11 @@ class ReviewParser:
         if not element:
             return ""
         
-        # Сохраняем переносы строк
         for br in element.find_all("br"):
             br.replace_with("\n")
         
         text = element.get_text(separator='\n')
         
-        # Очистка от лишних пробелов
         lines = [line.strip() for line in text.split('\n')]
         lines = [line for line in lines if line]
         
@@ -254,30 +239,24 @@ class ReviewParser:
                 logging.warning(f"Не удалось загрузить страницу {page + 1}")
                 continue
             
-            # Парсим отзывы со страницы списка
             previews = self.parse_reviews_from_list(html)
             
             for i, preview in enumerate(previews, 1):
                 logging.info(f"Обработка отзыва {i}/{len(previews)}: {preview['title'][:30]}...")
                 
-                # Получаем полный текст отзыва
                 full_data = self.parse_full_review(preview['review_url'])
                 
                 if full_data:
-                    # Объединяем данные
                     complete_review = {**preview, **full_data}
                     all_reviews.append(complete_review)
                 else:
-                    # Сохраняем хотя бы превью
                     preview['full_text'] = preview.get('teaser_text', '')
                     all_reviews.append(preview)
                 
-                # Задержка между запросами
                 time.sleep(random.uniform(1, 3))
             
             logging.info(f"Страница {page + 1} обработана. Всего отзывов: {len(all_reviews)}")
             
-            # Задержка между страницами
             if page < pages - 1:
                 time.sleep(random.uniform(2, 4))
         
@@ -290,7 +269,6 @@ class ReviewParser:
             return False
             
         try:
-            # Определяем все возможные поля
             fieldnames = [
                 'product_name', 'author', 'rating', 'date_created', 'time_created',
                 'title', 'teaser_text', 'full_text', 'experience', 'pluses', 
@@ -302,7 +280,6 @@ class ReviewParser:
                 writer.writeheader()
                 
                 for review in reviews:
-                    # Записываем только существующие поля
                     row = {field: review.get(field, '') for field in fieldnames}
                     writer.writerow(row)
             
@@ -313,24 +290,19 @@ class ReviewParser:
             logging.error(f"Ошибка при сохранении в CSV: {e}")
             return False
 
-# Пример использования
 def main():
-    # URL страницы с отзывами (замените на актуальный)
     START_URL = "https://irecommend.ru/catalog/reviews/939-13393?page=7"
     
     parser = ReviewParser()
     
     logging.info("Начало парсинга отзывов...")
     
-    # Собираем отзывы (например, с 3 страниц)
     reviews = parser.scrape_reviews(START_URL, pages=1)
     
     if reviews:
-        # Сохраняем в CSV
         filename = f"reviews_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
         parser.save_to_csv(reviews, filename)
         
-        # Выводим статистику
         logging.info(f"Собрано отзывов: {len(reviews)}")
         logging.info(f"Первый отзыв: {reviews[0]['title']}")
         logging.info(f"Текст первого отзыва: {reviews[0]['full_text'][:100]}...")

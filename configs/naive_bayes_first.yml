@@ -4,8 +4,8 @@ mlflow:
 
 data:
   source_run: "First dataset"
-  dataset_file: "first_experiment_dataset.csv"  # ← имя файла
-  dataset_path: "datasets"  # ← папка с файлом
+  dataset_file: "first_experiment_dataset.csv"
+  dataset_path: "datasets"
 
 vectorizer:
   lowercase: true

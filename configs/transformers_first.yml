@@ -18,8 +18,8 @@ model:
 # Конфигурация токенизатора
 tokenizer:
   truncation: true
-  padding: true  # меняем на true для стабильности
-  max_length: 256  # уменьшаем длину для tiny модели
+  padding: true
+  max_length: 256
   return_tensors: null
 
 # Конфигурация обучения
@@ -28,23 +28,22 @@ training:
   val_size: 0.5
   random_state: 42
   output_dir: "./models/"
-  num_train_epochs: 10  # увеличиваем эпохи
-  learning_rate: 2e-5  # УВЕЛИЧИВАЕМ в 10 раз!
-  per_device_train_batch_size: 16  # УВЕЛИЧИВАЕМ
+  num_train_epochs: 10
+  learning_rate: 2e-5
+  per_device_train_batch_size: 16
   per_device_eval_batch_size: 16
   warmup_ratio: 0.1
   lr_scheduler_type: "linear"
-  weight_decay: 0.01  # уменьшаем
+  weight_decay: 0.01
   max_grad_norm: 1.0
   logging_steps: 50
   eval_strategy: "epoch"
   save_strategy: "epoch"
   save_total_limit: 2
   load_best_model_at_end: true
-  metric_for_best_model: "f1-score"  # меняем на f1_score
-  early_stopping_patience: 3  # уменьшаем
+  metric_for_best_model: "f1-score"
+  early_stopping_patience: 3
 
-# Конфигурация артефактов
 artifacts:
   model_dir: "Transformers_ver_1_improved"
   tokenizer_dir: "Tokenizer_transformers_ver_1_improved"

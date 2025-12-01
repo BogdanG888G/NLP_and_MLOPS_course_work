@@ -1,12 +1,12 @@
 import streamlit as st
-from transformers import pipeline
+from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
 import os
 from sqlalchemy import create_engine, text
 
 # Получаем абсолютный путь к текущей директории
 current_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(current_dir, 'best_model_transformer_fixed')
-tokenizer_path = os.path.join(current_dir, 'best_model_tokenaiser_fixed')
+model_path = os.path.join(current_dir, 'best_model', 'model')
+tokenizer_path = os.path.join(current_dir, 'best_model', 'tokenizer')
 
 st.set_page_config(page_title="Text Classification", layout="wide")
 st.title("🎯 Классификатор отзывов о чипсах")
@@ -17,15 +17,24 @@ engine = create_engine("postgresql+psycopg2://airflow:airflow@localhost:5433/air
 @st.cache_resource
 def load_model():
     try:
+        # Проверяем существование файлов
+        if not os.path.exists(model_path):
+            st.error(f"Модель не найдена по пути: {model_path}")
+            return None
+        if not os.path.exists(tokenizer_path):
+            st.error(f"Токенайзер не найден по пути: {tokenizer_path}")
+            return None
+            
         classifier = pipeline(
             'text-classification',
             model=model_path,
             tokenizer=tokenizer_path,
             device=-1
         )
+        st.success("✅ Модель успешно загружена!")
         return classifier
     except Exception as e:
-        st.error(f"Ошибка: {e}")
+        st.error(f"Ошибка загрузки модели: {e}")
         return None
 
 model = load_model()

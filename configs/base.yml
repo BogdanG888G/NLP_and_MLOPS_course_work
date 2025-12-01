@@ -1,9 +1,8 @@
-# Базовые настройки для всех экспериментов
+
 mlflow:
   tracking_uri: "http://127.0.0.1:8080"
   experiment_name: "nlp_project"
 
-# Общие пути к данным
 data:
   base_path: "./data"
   input_files:

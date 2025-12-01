@@ -40,6 +40,12 @@
 
 Автоматизация запуска парсера (раз в сутки, в 5 утра) была реализована через Airflow:
 
+Данные для входа:
+
+* Логин: `admin`
+
+* Пароль: `admin`
+
 ![alt text](image-1.png)
 ![alt text](image-2.png)
 
@@ -68,6 +74,8 @@ http://localhost:8080/
 ## Запуск инференса-сервиса (FAST API):
 
 ```cmd
+docker build -t sentiment-api .
+
 docker run -p 8000:8000 sentiment-api
 ```
 

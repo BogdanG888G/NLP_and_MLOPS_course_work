@@ -2,13 +2,11 @@ mlflow:
   tracking_uri: "http://127.0.0.1:8080"
   experiment_id: "0"
 
-# Конфигурация данных
 data:
   source_run: "First dataset"
-  dataset_file: "first_experiment_dataset.csv"  # ← имя файла
-  dataset_path: "datasets"  # ← добавляем путь к папке
+  dataset_file: "first_experiment_dataset.csv"
+  dataset_path: "datasets"
 
-# Конфигурация токенизатора
 tokenizer:
   num_words: 2000
   oov_token: "<OOV>"
@@ -17,15 +15,14 @@ tokenizer:
   split: " "
   char_level: false
 
-# Конфигурация обучения
+
 training:
   test_size: 0.2
-  val_size: 0.5  # от test_size
+  val_size: 0.5 
   random_state: 42
   batch_size: 16
   epochs: 20
 
-# Конфигурация модели
 model:
   version: "1.0.0"
   embedding_dim: 128
